@@ -1,94 +1,148 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-      "newVMName": {
-        "type": "string",
-        "defaultValue": "najones001"
-      },
-      "labName": {
-        "type": "string",
-        "defaultValue": "DextersLab-WEU"
-      },
-      "size": {
-        "type": "string",
-        "defaultValue": "Standard_DS1_v2"
-      },
-      "userName": {
-        "type": "string",
-        "defaultValue": "najones"
-      },
-      "password": {
-        "type": "securestring"
-      },
-      "MSRCSUPP_Download_File_from_URI_URI": {
-        "type": "string",
-        "defaultValue": "https://dexterslab453.blob.core.windows.net/artifactdata/DomainJoin.ps1"
-      },
-      "MSRCSUPP_Download_File_from_URI_FileDestination": {
-        "type": "string",
-        "defaultValue": "C:\\Users\\Public\\Desktop\\DomainJoin.ps1"
-      }
+        "location": {
+            "type": "string"
+        },
+        "virtualMachineName": {
+            "type": "string"
+        },
+        "virtualMachineSize": {
+            "type": "string"
+        },
+        "adminUsername": {
+            "type": "string"
+        },
+        "virtualNetworkName": {
+            "type": "string"
+        },
+        "networkInterfaceName": {
+            "type": "string"
+        },
+        "networkSecurityGroupName": {
+            "type": "string"
+        },
+        "adminPassword": {
+            "type": "securestring"
+        },
+        "diagnosticsStorageAccountName": {
+            "type": "string"
+        },
+        "diagnosticsStorageAccountId": {
+            "type": "string"
+        },
+        "diagnosticsStorageAccountType": {
+            "type": "string"
+        },
+        "subnetName": {
+            "type": "string"
+        }
     },
     "variables": {
-      "labSubnetName": "Subnet-1",
-      "labVirtualNetworkId": "[resourceId('Microsoft.DevTestLab/labs/virtualnetworks', parameters('labName'), variables('labVirtualNetworkName'))]",
-      "labVirtualNetworkName": "MSRC-UK-CORP-WEU-VNET-7348",
-      "vmId": "[resourceId ('Microsoft.DevTestLab/labs/virtualmachines', parameters('labName'), parameters('newVMName'))]",
-      "vmName": "[concat(parameters('labName'), '/', parameters('newVMName'))]"
+        "vnetId": "[resourceId('ERNetwork','Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+        "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]"
     },
     "resources": [
-      {
-        "apiVersion": "2017-04-26-preview",
-        "type": "Microsoft.DevTestLab/labs/virtualmachines",
-        "name": "[variables('vmName')]",
-        "location": "[resourceGroup().location]",
-        "properties": {
-          "labVirtualNetworkId": "[variables('labVirtualNetworkId')]",
-          "notes": "Windows Server 2016 Datacenter",
-          "galleryImageReference": {
-            "offer": "WindowsServer",
-            "publisher": "MicrosoftWindowsServer",
-            "sku": "2016-Datacenter",
-            "osType": "Windows",
-            "version": "latest"
-          },
-          "size": "[parameters('size')]",
-          "userName": "[parameters('userName')]",
-          "password": "[parameters('password')]",
-          "isAuthenticationWithSshKey": false,
-          "artifacts": [
-            {
-              "artifactId": "[resourceId('Microsoft.DevTestLab/labs/artifactSources/artifacts', parameters('labName'), 'public repo', 'windows-enable-local-admins')]"
-            },
-            {
-              "artifactId": "[resourceId('Microsoft.DevTestLab/labs/artifactSources/artifacts', parameters('labName'), 'privaterepo906', 'windows-powershell5.1')]"
-            },
-            {
-              "artifactId": "[resourceId('Microsoft.DevTestLab/labs/artifactSources/artifacts', parameters('labName'), 'privaterepo906', 'windows-download-sas-blob-MSRCSUPP')]",
-              "parameters": [
-                {
-                  "name": "URI",
-                  "value": "[parameters('MSRCSUPP_Download_File_from_URI_URI')]"
+        {
+            "name": "[parameters('virtualMachineName')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2017-03-30",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceName'))]",
+                "[concat('Microsoft.Storage/storageAccounts/', parameters('diagnosticsStorageAccountName'))]"
+            ],
+            "properties": {
+                "osProfile": {
+                    "computerName": "[parameters('virtualMachineName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "provisionVmAgent": "true"
+                    }
                 },
-                {
-                  "name": "FileDestination",
-                  "value": "[parameters('MSRCSUPP_Download_File_from_URI_FileDestination')]"
+                "hardwareProfile": {
+                    "vmSize": "[parameters('virtualMachineSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2016-Datacenter",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "Premium_LRS"
+                        }
+                    },
+                    "dataDisks": []
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaceName'))]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[reference(resourceId('najonesb-tst-rg', 'Microsoft.Storage/storageAccounts', parameters('diagnosticsStorageAccountName')), '2015-06-15').primaryEndpoints['blob']]"
+                    }
                 }
-              ]
             }
-          ],
-          "labSubnetName": "[variables('labSubnetName')]",
-          "disallowPublicIpAddress": true,
-          "storageType": "Premium",
-          "allowClaim": false
+        },
+        {
+            "name": "[parameters('diagnosticsStorageAccountName')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2015-06-15",
+            "location": "[parameters('location')]",
+            "properties": {
+                "accountType": "[parameters('diagnosticsStorageAccountType')]"
+            }
+        },
+        {
+            "name": "[parameters('networkInterfaceName')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2018-04-01",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic"
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[resourceId('najonesb-tst-rg', 'Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+                }
+            }
+        },
+        {
+            "name": "[parameters('networkSecurityGroupName')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2018-01-01",
+            "location": "[parameters('location')]",
+            "properties": {
+                "securityRules": []
+            }
         }
-      }
     ],
     "outputs": {
-      "labVMId": {
-        "type": "string",
-        "value": "[variables('vmId')]"
-      }
+        "adminUsername": {
+            "type": "string",
+            "value": "[parameters('adminUsername')]"
+        }
     }
-  }
+}
