@@ -3,11 +3,10 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "location": {
-            "defaultValue": "westeurope",
-            "type": "String"
+            "value": "westeurope"
         },
         "virtualMachineName": {
-            "defaultValue": "najonesb3-tst"
+            "value": "najonesb3-tst"
         },
         "virtualMachineSize": {
             "value": "Standard_D4s_v3"
