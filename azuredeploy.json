@@ -2,110 +2,132 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "virtualMachines_najones_ltst_name": {
-            "defaultValue": "najones-ltst",
+        "virtualMachines_najones_2k16_name": {
+            "defaultValue": "najones-2k16",
             "type": "String"
         },
-        "networkInterfaces_najones_ltst_name": {
-            "defaultValue": "najones-ltst",
+        "networkInterfaces_najones_2k16173_name": {
+            "defaultValue": "najones-2k16173",
             "type": "String"
         },
-        "virtualMachines_najones_ltst_id": {
-            "defaultValue": "/subscriptions/c52809e7-de2c-4b81-96fa-245821e514f7/resourceGroups/DextersLab-WEU-najones-ltst-148844/providers/Microsoft.Compute/disks/najones-ltst",
+        "storageAccounts_najones2k16rgdiag215_name": {
+            "defaultValue": "najones2k16rgdiag215",
             "type": "String"
         },
-        "networkInterfaces_najones_ltst_id": {
-            "defaultValue": "/subscriptions/c52809e7-de2c-4b81-96fa-245821e514f7/resourceGroups/ERNetwork/providers/Microsoft.Network/virtualNetworks/MSRC-UK-CORP-WEU-VNET-7348/subnets/Subnet-1",
+        "virtualMachines_najones_2k16_id": {
+            "defaultValue": "/subscriptions/c52809e7-de2c-4b81-96fa-245821e514f7/resourceGroups/MSRCSUPP-KeyVault-RG/providers/Microsoft.KeyVault/vaults/MSRCSUPP-KeyVault",
+            "type": "String"
+        },
+        "virtualMachines_najones_2k16_id_1": {
+            "defaultValue": "/subscriptions/c52809e7-de2c-4b81-96fa-245821e514f7/resourceGroups/NAJONES-2K16-RG/providers/Microsoft.Compute/disks/najones-2k16_OsDisk_1_bc741af1411a4630a0950633430391e5",
+            "type": "String"
+        },
+        "networkInterfaces_najones_2k16173_id": {
+            "defaultValue": "/subscriptions/c52809e7-de2c-4b81-96fa-245821e514f7/resourceGroups/ERNETWORK/providers/Microsoft.Network/virtualNetworks/MSRC-UK-Corp-NEU-VNET-1/subnets/Subnet-1",
             "type": "String"
         }
     },
     "variables": {},
     "resources": [
         {
-            "comments": "Generalized from resource: '/subscriptions/c52809e7-de2c-4b81-96fa-245821e514f7/resourceGroups/DextersLab-WEU-najones-ltst-148844/providers/Microsoft.Compute/virtualMachines/najones-ltst'.",
+            "comments": "Generalized from resource: '/subscriptions/c52809e7-de2c-4b81-96fa-245821e514f7/resourceGroups/najones-2k16-rg/providers/Microsoft.Compute/virtualMachines/najones-2k16'.",
             "type": "Microsoft.Compute/virtualMachines",
-            "name": "[parameters('virtualMachines_najones_ltst_name')]",
+            "name": "[parameters('virtualMachines_najones_2k16_name')]",
             "apiVersion": "2017-12-01",
-            "location": "westeurope",
+            "location": "northeurope",
             "tags": {
-                "hidden-DevTestLabs-LabUId": "a31db5d5-101a-49a4-8d75-965984daf0dc",
                 "appID": "auto",
                 "orgID": "auto",
-                "env": "auto",
-                "hidden-DevTestLabs-LogicalResourceUId": "51c41c27-6933-4d29-a0d5-54b52837657f"
+                "env": "auto"
             },
             "scale": null,
             "properties": {
                 "hardwareProfile": {
-                    "vmSize": "Standard_D2s_v3"
+                    "vmSize": "Standard_DS2_v2_Promo"
                 },
                 "storageProfile": {
                     "imageReference": {
-                        "publisher": "Canonical",
-                        "offer": "UbuntuServer",
-                        "sku": "16.04-LTS",
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2016-Datacenter",
                         "version": "latest"
                     },
                     "osDisk": {
-                        "osType": "Linux",
-                        "name": "[parameters('virtualMachines_najones_ltst_name')]",
+                        "osType": "Windows",
+                        "encryptionSettings": {
+                            "enabled": true,
+                            "diskEncryptionKey": {
+                                "sourceVault": {
+                                    "id": "[parameters('virtualMachines_najones_2k16_id')]"
+                                },
+                                "secretUrl": "https://msrcsupp-keyvault.vault.azure.net/secrets/BF218040-B3E2-4C39-B4D0-A2C10E0B6272/fd4c3e9c484d4f23920e470491276a4f"
+                            }
+                        },
+                        "name": "[concat(parameters('virtualMachines_najones_2k16_name'),'_OsDisk_1_bc741af1411a4630a0950633430391e5')]",
                         "createOption": "FromImage",
                         "caching": "ReadWrite",
                         "managedDisk": {
                             "storageAccountType": "Premium_LRS",
-                            "id": "[parameters('virtualMachines_najones_ltst_id')]"
+                            "id": "[parameters('virtualMachines_najones_2k16_id_1')]"
                         },
-                        "diskSizeGB": 30
+                        "diskSizeGB": 128
                     },
                     "dataDisks": []
                 },
                 "osProfile": {
-                    "computerName": "[parameters('virtualMachines_najones_ltst_name')]",
+                    "computerName": "[parameters('virtualMachines_najones_2k16_name')]",
                     "adminUsername": "msrcsupp",
-                    "linuxConfiguration": {
-                        "disablePasswordAuthentication": false
+                    "windowsConfiguration": {
+                        "provisionVMAgent": true,
+                        "enableAutomaticUpdates": true
                     },
                     "secrets": []
                 },
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_najones_ltst_name'))]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_najones_2k16173_name'))]"
                         }
                     ]
-                }
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[concat('https', '://', parameters('storageAccounts_najones2k16rgdiag215_name'), '.blob.core.windows.net', '/')]"
+                    }
+                },
+                "licenseType": "Windows_Server"
             },
             "dependsOn": [
-                "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_najones_ltst_name'))]"
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_najones_2k16173_name'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_najones2k16rgdiag215_name'))]"
             ]
         },
         {
-            "comments": "Generalized from resource: '/subscriptions/c52809e7-de2c-4b81-96fa-245821e514f7/resourceGroups/DextersLab-WEU-najones-ltst-148844/providers/Microsoft.Network/networkInterfaces/najones-ltst'.",
+            "comments": "Generalized from resource: '/subscriptions/c52809e7-de2c-4b81-96fa-245821e514f7/resourceGroups/najones-2k16-rg/providers/Microsoft.Network/networkInterfaces/najones-2k16173'.",
             "type": "Microsoft.Network/networkInterfaces",
-            "name": "[parameters('networkInterfaces_najones_ltst_name')]",
+            "name": "[parameters('networkInterfaces_najones_2k16173_name')]",
             "apiVersion": "2018-02-01",
-            "location": "westeurope",
+            "location": "northeurope",
             "tags": {
-                "hidden-DevTestLabs-LabUId": "a31db5d5-101a-49a4-8d75-965984daf0dc",
                 "appID": "auto",
                 "orgID": "auto",
-                "env": "auto",
-                "hidden-DevTestLabs-LogicalResourceUId": "51c41c27-6933-4d29-a0d5-54b52837657f"
+                "env": "auto"
             },
             "scale": null,
             "properties": {
                 "provisioningState": "Succeeded",
-                "resourceGuid": "f7c8a757-2292-4952-bb40-0e07f0e6dd76",
+                "resourceGuid": "1c51f79e-f537-41e7-81d9-a329e36dd44e",
                 "ipConfigurations": [
                     {
-                        "name": "NicIPConfigName1",
-                        "etag": "W/\"26a5b0f6-18cd-4edb-93c1-17ab6a77df16\"",
+                        "name": "ipconfig1",
+                        "etag": "W/\"f5f3c3a1-dd9e-4f61-b1ff-32840fad1347\"",
                         "properties": {
                             "provisioningState": "Succeeded",
-                            "privateIPAddress": "10.219.219.10",
+                            "privateIPAddress": "10.151.1.173",
                             "privateIPAllocationMethod": "Dynamic",
                             "subnet": {
-                                "id": "[parameters('networkInterfaces_najones_ltst_id')]"
+                                "id": "[parameters('networkInterfaces_najones_2k16173_id')]"
                             },
                             "primary": true,
                             "privateIPAddressVersion": "IPv4"
@@ -115,12 +137,51 @@
                 "dnsSettings": {
                     "dnsServers": [],
                     "appliedDnsServers": [],
-                    "internalDomainNameSuffix": "aip2jq5p0jbupdyw1zv0zbg25e.ax.internal.cloudapp.net"
+                    "internalDomainNameSuffix": "sdelib2lfxtunagiawvhw532zb.fx.internal.cloudapp.net"
                 },
-                "macAddress": "00-0D-3A-2D-98-9F",
+                "macAddress": "00-0D-3A-B1-FA-55",
                 "enableAcceleratedNetworking": false,
                 "enableIPForwarding": false,
                 "primary": true
+            },
+            "dependsOn": []
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/c52809e7-de2c-4b81-96fa-245821e514f7/resourceGroups/najones-2k16-rg/providers/Microsoft.Storage/storageAccounts/najones2k16rgdiag215'.",
+            "type": "Microsoft.Storage/storageAccounts",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "Storage",
+            "name": "[parameters('storageAccounts_najones2k16rgdiag215_name')]",
+            "apiVersion": "2018-02-01",
+            "location": "northeurope",
+            "tags": {
+                "appID": "auto",
+                "env": "auto",
+                "orgID": "auto"
+            },
+            "scale": null,
+            "properties": {
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [],
+                    "ipRules": [],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": false,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "enabled": true
+                        },
+                        "blob": {
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                }
             },
             "dependsOn": []
         }
