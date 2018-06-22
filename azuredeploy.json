@@ -1,42 +1,42 @@
 {
-    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "location": {
-            "type": "string"
+            "value": "westeurope"
         },
         "virtualMachineName": {
-            "type": "string"
+            "value": "najonesb-tst"
         },
         "virtualMachineSize": {
-            "type": "string"
+            "value": "Standard_D2s_v3"
         },
         "adminUsername": {
-            "type": "string"
+            "value": "msrcsupp"
         },
         "virtualNetworkName": {
-            "type": "string"
+            "value": "MSRC-UK-CORP-WEU-VNET-3608"
         },
         "networkInterfaceName": {
-            "type": "string"
+            "value": "najonesb-tst187"
         },
         "networkSecurityGroupName": {
-            "type": "string"
+            "value": "najonesb-tst-nsg"
         },
         "adminPassword": {
-            "type": "securestring"
+            "value": null
         },
         "diagnosticsStorageAccountName": {
-            "type": "string"
-        },
-        "diagnosticsStorageAccountId": {
-            "type": "string"
+            "value": "najonesbtstrgdiag205"
         },
         "diagnosticsStorageAccountType": {
-            "type": "string"
+            "value": "Standard_LRS"
+        },
+        "diagnosticsStorageAccountId": {
+            "value": "Microsoft.Storage/storageAccounts/najonesbtstrgdiag205"
         },
         "subnetName": {
-            "type": "string"
+            "value": "Subnet-1"
         }
     },
     "variables": {
