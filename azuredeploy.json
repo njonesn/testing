@@ -1,0 +1,94 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "newVMName": {
+        "type": "string",
+        "defaultValue": "najones001"
+      },
+      "labName": {
+        "type": "string",
+        "defaultValue": "DextersLab-WEU"
+      },
+      "size": {
+        "type": "string",
+        "defaultValue": "Standard_DS1_v2"
+      },
+      "userName": {
+        "type": "string",
+        "defaultValue": "najones"
+      },
+      "password": {
+        "type": "securestring"
+      },
+      "MSRCSUPP_Download_File_from_URI_URI": {
+        "type": "string",
+        "defaultValue": "https://dexterslab453.blob.core.windows.net/artifactdata/DomainJoin.ps1"
+      },
+      "MSRCSUPP_Download_File_from_URI_FileDestination": {
+        "type": "string",
+        "defaultValue": "C:\\Users\\Public\\Desktop\\DomainJoin.ps1"
+      }
+    },
+    "variables": {
+      "labSubnetName": "Subnet-1",
+      "labVirtualNetworkId": "[resourceId('Microsoft.DevTestLab/labs/virtualnetworks', parameters('labName'), variables('labVirtualNetworkName'))]",
+      "labVirtualNetworkName": "MSRC-UK-CORP-WEU-VNET-7348",
+      "vmId": "[resourceId ('Microsoft.DevTestLab/labs/virtualmachines', parameters('labName'), parameters('newVMName'))]",
+      "vmName": "[concat(parameters('labName'), '/', parameters('newVMName'))]"
+    },
+    "resources": [
+      {
+        "apiVersion": "2017-04-26-preview",
+        "type": "Microsoft.DevTestLab/labs/virtualmachines",
+        "name": "[variables('vmName')]",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "labVirtualNetworkId": "[variables('labVirtualNetworkId')]",
+          "notes": "Windows Server 2016 Datacenter",
+          "galleryImageReference": {
+            "offer": "WindowsServer",
+            "publisher": "MicrosoftWindowsServer",
+            "sku": "2016-Datacenter",
+            "osType": "Windows",
+            "version": "latest"
+          },
+          "size": "[parameters('size')]",
+          "userName": "[parameters('userName')]",
+          "password": "[parameters('password')]",
+          "isAuthenticationWithSshKey": false,
+          "artifacts": [
+            {
+              "artifactId": "[resourceId('Microsoft.DevTestLab/labs/artifactSources/artifacts', parameters('labName'), 'public repo', 'windows-enable-local-admins')]"
+            },
+            {
+              "artifactId": "[resourceId('Microsoft.DevTestLab/labs/artifactSources/artifacts', parameters('labName'), 'privaterepo906', 'windows-powershell5.1')]"
+            },
+            {
+              "artifactId": "[resourceId('Microsoft.DevTestLab/labs/artifactSources/artifacts', parameters('labName'), 'privaterepo906', 'windows-download-sas-blob-MSRCSUPP')]",
+              "parameters": [
+                {
+                  "name": "URI",
+                  "value": "[parameters('MSRCSUPP_Download_File_from_URI_URI')]"
+                },
+                {
+                  "name": "FileDestination",
+                  "value": "[parameters('MSRCSUPP_Download_File_from_URI_FileDestination')]"
+                }
+              ]
+            }
+          ],
+          "labSubnetName": "[variables('labSubnetName')]",
+          "disallowPublicIpAddress": true,
+          "storageType": "Premium",
+          "allowClaim": false
+        }
+      }
+    ],
+    "outputs": {
+      "labVMId": {
+        "type": "string",
+        "value": "[variables('vmId')]"
+      }
+    }
+  }
