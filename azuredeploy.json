@@ -1,148 +1,128 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "location": {
-            "value": "westeurope"
+        "virtualMachines_najones_ltst_name": {
+            "defaultValue": "najones-ltst",
+            "type": "String"
         },
-        "virtualMachineName": {
-            "value": "najonesb-tst"
+        "networkInterfaces_najones_ltst_name": {
+            "defaultValue": "najones-ltst",
+            "type": "String"
         },
-        "virtualMachineSize": {
-            "value": "Standard_D2s_v3"
+        "virtualMachines_najones_ltst_id": {
+            "defaultValue": "/subscriptions/c52809e7-de2c-4b81-96fa-245821e514f7/resourceGroups/DextersLab-WEU-najones-ltst-148844/providers/Microsoft.Compute/disks/najones-ltst",
+            "type": "String"
         },
-        "adminUsername": {
-            "value": "msrcsupp"
-        },
-        "virtualNetworkName": {
-            "value": "MSRC-UK-CORP-WEU-VNET-3608"
-        },
-        "networkInterfaceName": {
-            "value": "najonesb-tst187"
-        },
-        "networkSecurityGroupName": {
-            "value": "najonesb-tst-nsg"
-        },
-        "adminPassword": {
-            "value": null
-        },
-        "diagnosticsStorageAccountName": {
-            "value": "najonesbtstrgdiag205"
-        },
-        "diagnosticsStorageAccountType": {
-            "value": "Standard_LRS"
-        },
-        "diagnosticsStorageAccountId": {
-            "value": "Microsoft.Storage/storageAccounts/najonesbtstrgdiag205"
-        },
-        "subnetName": {
-            "value": "Subnet-1"
+        "networkInterfaces_najones_ltst_id": {
+            "defaultValue": "/subscriptions/c52809e7-de2c-4b81-96fa-245821e514f7/resourceGroups/ERNetwork/providers/Microsoft.Network/virtualNetworks/MSRC-UK-CORP-WEU-VNET-7348/subnets/Subnet-1",
+            "type": "String"
         }
     },
-    "variables": {
-        "vnetId": "[resourceId('ERNetwork','Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
-        "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]"
-    },
+    "variables": {},
     "resources": [
         {
-            "name": "[parameters('virtualMachineName')]",
+            "comments": "Generalized from resource: '/subscriptions/c52809e7-de2c-4b81-96fa-245821e514f7/resourceGroups/DextersLab-WEU-najones-ltst-148844/providers/Microsoft.Compute/virtualMachines/najones-ltst'.",
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2017-03-30",
-            "location": "[parameters('location')]",
-            "dependsOn": [
-                "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceName'))]",
-                "[concat('Microsoft.Storage/storageAccounts/', parameters('diagnosticsStorageAccountName'))]"
-            ],
+            "name": "[parameters('virtualMachines_najones_ltst_name')]",
+            "apiVersion": "2017-12-01",
+            "location": "westeurope",
+            "tags": {
+                "hidden-DevTestLabs-LabUId": "a31db5d5-101a-49a4-8d75-965984daf0dc",
+                "appID": "auto",
+                "orgID": "auto",
+                "env": "auto",
+                "hidden-DevTestLabs-LogicalResourceUId": "51c41c27-6933-4d29-a0d5-54b52837657f"
+            },
+            "scale": null,
             "properties": {
-                "osProfile": {
-                    "computerName": "[parameters('virtualMachineName')]",
-                    "adminUsername": "[parameters('adminUsername')]",
-                    "adminPassword": "[parameters('adminPassword')]",
-                    "windowsConfiguration": {
-                        "provisionVmAgent": "true"
-                    }
-                },
                 "hardwareProfile": {
-                    "vmSize": "[parameters('virtualMachineSize')]"
+                    "vmSize": "Standard_D2s_v3"
                 },
                 "storageProfile": {
                     "imageReference": {
-                        "publisher": "MicrosoftWindowsServer",
-                        "offer": "WindowsServer",
-                        "sku": "2016-Datacenter",
+                        "publisher": "Canonical",
+                        "offer": "UbuntuServer",
+                        "sku": "16.04-LTS",
                         "version": "latest"
                     },
                     "osDisk": {
-                        "createOption": "fromImage",
+                        "osType": "Linux",
+                        "name": "[parameters('virtualMachines_najones_ltst_name')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite",
                         "managedDisk": {
-                            "storageAccountType": "Premium_LRS"
-                        }
+                            "storageAccountType": "Premium_LRS",
+                            "id": "[parameters('virtualMachines_najones_ltst_id')]"
+                        },
+                        "diskSizeGB": 30
                     },
                     "dataDisks": []
+                },
+                "osProfile": {
+                    "computerName": "[parameters('virtualMachines_najones_ltst_name')]",
+                    "adminUsername": "msrcsupp",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": false
+                    },
+                    "secrets": []
                 },
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaceName'))]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_najones_ltst_name'))]"
                         }
                     ]
-                },
-                "diagnosticsProfile": {
-                    "bootDiagnostics": {
-                        "enabled": true,
-                        "storageUri": "[reference(resourceId('najonesb-tst-rg', 'Microsoft.Storage/storageAccounts', parameters('diagnosticsStorageAccountName')), '2015-06-15').primaryEndpoints['blob']]"
-                    }
                 }
-            }
-        },
-        {
-            "name": "[parameters('diagnosticsStorageAccountName')]",
-            "type": "Microsoft.Storage/storageAccounts",
-            "apiVersion": "2015-06-15",
-            "location": "[parameters('location')]",
-            "properties": {
-                "accountType": "[parameters('diagnosticsStorageAccountType')]"
-            }
-        },
-        {
-            "name": "[parameters('networkInterfaceName')]",
-            "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2018-04-01",
-            "location": "[parameters('location')]",
+            },
             "dependsOn": [
-                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]"
-            ],
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_najones_ltst_name'))]"
+            ]
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/c52809e7-de2c-4b81-96fa-245821e514f7/resourceGroups/DextersLab-WEU-najones-ltst-148844/providers/Microsoft.Network/networkInterfaces/najones-ltst'.",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[parameters('networkInterfaces_najones_ltst_name')]",
+            "apiVersion": "2018-02-01",
+            "location": "westeurope",
+            "tags": {
+                "hidden-DevTestLabs-LabUId": "a31db5d5-101a-49a4-8d75-965984daf0dc",
+                "appID": "auto",
+                "orgID": "auto",
+                "env": "auto",
+                "hidden-DevTestLabs-LogicalResourceUId": "51c41c27-6933-4d29-a0d5-54b52837657f"
+            },
+            "scale": null,
             "properties": {
+                "provisioningState": "Succeeded",
+                "resourceGuid": "f7c8a757-2292-4952-bb40-0e07f0e6dd76",
                 "ipConfigurations": [
                     {
-                        "name": "ipconfig1",
+                        "name": "NicIPConfigName1",
+                        "etag": "W/\"26a5b0f6-18cd-4edb-93c1-17ab6a77df16\"",
                         "properties": {
+                            "provisioningState": "Succeeded",
+                            "privateIPAddress": "10.219.219.10",
+                            "privateIPAllocationMethod": "Dynamic",
                             "subnet": {
-                                "id": "[variables('subnetRef')]"
+                                "id": "[parameters('networkInterfaces_najones_ltst_id')]"
                             },
-                            "privateIPAllocationMethod": "Dynamic"
+                            "primary": true,
+                            "privateIPAddressVersion": "IPv4"
                         }
                     }
                 ],
-                "networkSecurityGroup": {
-                    "id": "[resourceId('najonesb-tst-rg', 'Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
-                }
-            }
-        },
-        {
-            "name": "[parameters('networkSecurityGroupName')]",
-            "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2018-01-01",
-            "location": "[parameters('location')]",
-            "properties": {
-                "securityRules": []
-            }
+                "dnsSettings": {
+                    "dnsServers": [],
+                    "appliedDnsServers": [],
+                    "internalDomainNameSuffix": "aip2jq5p0jbupdyw1zv0zbg25e.ax.internal.cloudapp.net"
+                },
+                "macAddress": "00-0D-3A-2D-98-9F",
+                "enableAcceleratedNetworking": false,
+                "enableIPForwarding": false,
+                "primary": true
+            },
+            "dependsOn": []
         }
-    ],
-    "outputs": {
-        "adminUsername": {
-            "type": "string",
-            "value": "[parameters('adminUsername')]"
-        }
-    }
+    ]
 }
