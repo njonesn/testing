@@ -1,49 +1,69 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "virtualMachines_najones_2k16_name": {
-            "defaultValue": "najones-2k16",
-            "type": "String"
+        "location": {
+            "value": "westeurope"
         },
-        "networkInterfaces_najones_2k16173_name": {
-            "defaultValue": "najones-2k16173",
-            "type": "String"
+        "virtualMachineName": {
+            "value": "najonesb3-tst"
         },
-        "storageAccounts_najones2k16rgdiag215_name": {
-            "defaultValue": "najones2k16rgdiag215",
-            "type": "String"
+        "virtualMachineSize": {
+            "value": "Standard_D4s_v3"
         },
-        "virtualMachines_najones_2k16_id": {
-            "defaultValue": "/subscriptions/c52809e7-de2c-4b81-96fa-245821e514f7/resourceGroups/MSRCSUPP-KeyVault-RG/providers/Microsoft.KeyVault/vaults/MSRCSUPP-KeyVault",
-            "type": "String"
+        "adminUsername": {
+            "value": "msrcsupp"
         },
-        "virtualMachines_najones_2k16_id_1": {
-            "defaultValue": "/subscriptions/c52809e7-de2c-4b81-96fa-245821e514f7/resourceGroups/NAJONES-2K16-RG/providers/Microsoft.Compute/disks/najones-2k16_OsDisk_1_bc741af1411a4630a0950633430391e5",
-            "type": "String"
+        "virtualNetworkName": {
+            "value": "MSRC-UK-CORP-WEU-VNET-3608"
         },
-        "networkInterfaces_najones_2k16173_id": {
-            "defaultValue": "/subscriptions/c52809e7-de2c-4b81-96fa-245821e514f7/resourceGroups/ERNETWORK/providers/Microsoft.Network/virtualNetworks/MSRC-UK-Corp-NEU-VNET-1/subnets/Subnet-1",
-            "type": "String"
+        "networkInterfaceName": {
+            "value": "najonesb3-tst29"
+        },
+        "networkSecurityGroupName": {
+            "value": "najonesb3-tst-nsg"
+        },
+        "adminPassword": {
+            "value": null
+        },
+        "diagnosticsStorageAccountName": {
+            "value": "najonesb3tstrgdiag119"
+        },
+        "diagnosticsStorageAccountType": {
+            "value": "Standard_LRS"
+        },
+        "diagnosticsStorageAccountId": {
+            "value": "Microsoft.Storage/storageAccounts/najonesb3tstrgdiag119"
+        },
+        "subnetName": {
+            "value": "Subnet-1"
         }
     },
-    "variables": {},
+    "variables": {
+        "vnetId": "[resourceId('ERNetwork','Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+        "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]"
+    },
     "resources": [
         {
-            "comments": "Generalized from resource: '/subscriptions/c52809e7-de2c-4b81-96fa-245821e514f7/resourceGroups/najones-2k16-rg/providers/Microsoft.Compute/virtualMachines/najones-2k16'.",
+            "name": "[parameters('virtualMachineName')]",
             "type": "Microsoft.Compute/virtualMachines",
-            "name": "[parameters('virtualMachines_najones_2k16_name')]",
-            "apiVersion": "2017-12-01",
-            "location": "northeurope",
-            "tags": {
-                "appID": "auto",
-                "orgID": "auto",
-                "env": "auto"
-            },
-            "scale": null,
+            "apiVersion": "2017-03-30",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceName'))]",
+                "[concat('Microsoft.Storage/storageAccounts/', parameters('diagnosticsStorageAccountName'))]"
+            ],
             "properties": {
+                "osProfile": {
+                    "computerName": "[parameters('virtualMachineName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "provisionVmAgent": "true"
+                    }
+                },
                 "hardwareProfile": {
-                    "vmSize": "Standard_DS2_v2_Promo"
+                    "vmSize": "[parameters('virtualMachineSize')]"
                 },
                 "storageProfile": {
                     "imageReference": {
@@ -53,137 +73,77 @@
                         "version": "latest"
                     },
                     "osDisk": {
-                        "osType": "Windows",
-                        "encryptionSettings": {
-                            "enabled": true,
-                            "diskEncryptionKey": {
-                                "sourceVault": {
-                                    "id": "[parameters('virtualMachines_najones_2k16_id')]"
-                                },
-                                "secretUrl": "https://msrcsupp-keyvault.vault.azure.net/secrets/BF218040-B3E2-4C39-B4D0-A2C10E0B6272/fd4c3e9c484d4f23920e470491276a4f"
-                            }
-                        },
-                        "name": "[concat(parameters('virtualMachines_najones_2k16_name'),'_OsDisk_1_bc741af1411a4630a0950633430391e5')]",
-                        "createOption": "FromImage",
-                        "caching": "ReadWrite",
+                        "createOption": "fromImage",
                         "managedDisk": {
-                            "storageAccountType": "Premium_LRS",
-                            "id": "[parameters('virtualMachines_najones_2k16_id_1')]"
-                        },
-                        "diskSizeGB": 128
+                            "storageAccountType": "Premium_LRS"
+                        }
                     },
                     "dataDisks": []
-                },
-                "osProfile": {
-                    "computerName": "[parameters('virtualMachines_najones_2k16_name')]",
-                    "adminUsername": "msrcsupp",
-                    "windowsConfiguration": {
-                        "provisionVMAgent": true,
-                        "enableAutomaticUpdates": true
-                    },
-                    "secrets": []
                 },
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_najones_2k16173_name'))]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaceName'))]"
                         }
                     ]
                 },
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
                         "enabled": true,
-                        "storageUri": "[concat('https', '://', parameters('storageAccounts_najones2k16rgdiag215_name'), '.blob.core.windows.net', '/')]"
+                        "storageUri": "[reference(resourceId('najonesb3-tst-rg', 'Microsoft.Storage/storageAccounts', parameters('diagnosticsStorageAccountName')), '2015-06-15').primaryEndpoints['blob']]"
                     }
-                },
-                "licenseType": "Windows_Server"
-            },
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_najones_2k16173_name'))]",
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_najones2k16rgdiag215_name'))]"
-            ]
+                }
+            }
         },
         {
-            "comments": "Generalized from resource: '/subscriptions/c52809e7-de2c-4b81-96fa-245821e514f7/resourceGroups/najones-2k16-rg/providers/Microsoft.Network/networkInterfaces/najones-2k16173'.",
-            "type": "Microsoft.Network/networkInterfaces",
-            "name": "[parameters('networkInterfaces_najones_2k16173_name')]",
-            "apiVersion": "2018-02-01",
-            "location": "northeurope",
-            "tags": {
-                "appID": "auto",
-                "orgID": "auto",
-                "env": "auto"
-            },
-            "scale": null,
+            "name": "[parameters('diagnosticsStorageAccountName')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2015-06-15",
+            "location": "[parameters('location')]",
             "properties": {
-                "provisioningState": "Succeeded",
-                "resourceGuid": "1c51f79e-f537-41e7-81d9-a329e36dd44e",
+                "accountType": "[parameters('diagnosticsStorageAccountType')]"
+            }
+        },
+        {
+            "name": "[parameters('networkInterfaceName')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2018-04-01",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]"
+            ],
+            "properties": {
                 "ipConfigurations": [
                     {
                         "name": "ipconfig1",
-                        "etag": "W/\"f5f3c3a1-dd9e-4f61-b1ff-32840fad1347\"",
                         "properties": {
-                            "provisioningState": "Succeeded",
-                            "privateIPAddress": "10.151.1.173",
-                            "privateIPAllocationMethod": "Dynamic",
                             "subnet": {
-                                "id": "[parameters('networkInterfaces_najones_2k16173_id')]"
+                                "id": "[variables('subnetRef')]"
                             },
-                            "primary": true,
-                            "privateIPAddressVersion": "IPv4"
+                            "privateIPAllocationMethod": "Dynamic"
                         }
                     }
                 ],
-                "dnsSettings": {
-                    "dnsServers": [],
-                    "appliedDnsServers": [],
-                    "internalDomainNameSuffix": "sdelib2lfxtunagiawvhw532zb.fx.internal.cloudapp.net"
-                },
-                "macAddress": "00-0D-3A-B1-FA-55",
-                "enableAcceleratedNetworking": false,
-                "enableIPForwarding": false,
-                "primary": true
-            },
-            "dependsOn": []
+                "enableAcceleratedNetworking": true,
+                "networkSecurityGroup": {
+                    "id": "[resourceId('najonesb3-tst-rg', 'Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+                }
+            }
         },
         {
-            "comments": "Generalized from resource: '/subscriptions/c52809e7-de2c-4b81-96fa-245821e514f7/resourceGroups/najones-2k16-rg/providers/Microsoft.Storage/storageAccounts/najones2k16rgdiag215'.",
-            "type": "Microsoft.Storage/storageAccounts",
-            "sku": {
-                "name": "Standard_LRS",
-                "tier": "Standard"
-            },
-            "kind": "Storage",
-            "name": "[parameters('storageAccounts_najones2k16rgdiag215_name')]",
-            "apiVersion": "2018-02-01",
-            "location": "northeurope",
-            "tags": {
-                "appID": "auto",
-                "env": "auto",
-                "orgID": "auto"
-            },
-            "scale": null,
+            "name": "[parameters('networkSecurityGroupName')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2018-01-01",
+            "location": "[parameters('location')]",
             "properties": {
-                "networkAcls": {
-                    "bypass": "AzureServices",
-                    "virtualNetworkRules": [],
-                    "ipRules": [],
-                    "defaultAction": "Allow"
-                },
-                "supportsHttpsTrafficOnly": false,
-                "encryption": {
-                    "services": {
-                        "file": {
-                            "enabled": true
-                        },
-                        "blob": {
-                            "enabled": true
-                        }
-                    },
-                    "keySource": "Microsoft.Storage"
-                }
-            },
-            "dependsOn": []
+                "securityRules": []
+            }
         }
-    ]
+    ],
+    "outputs": {
+        "adminUsername": {
+            "type": "string",
+            "value": "[parameters('adminUsername')]"
+        }
+    }
 }
