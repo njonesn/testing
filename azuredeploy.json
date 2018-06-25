@@ -17,6 +17,13 @@
         }
   
       },
+
+      "Subscription":  {
+
+        "type": "string",
+
+        "defaultValue": "MSRC-UK Express Route CC70550"
+      },
   
       "adminPassword": {
   
